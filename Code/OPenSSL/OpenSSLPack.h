@@ -10,7 +10,7 @@
 #include <openssl/rsa.h>
 #include <openssl/pem.h>
 #include <openssl/bio.h>
-
+#include <openssl/md5.h>
 
 class OpenSSLPack
 {
@@ -27,6 +27,9 @@ class OpenSSLPack
 
 	std::string Public_Decrypt(const std::string,const std::string);
 	std::string Private_Decrypt(const std::string,const std::string);
+	
+	std::string Md5_Encrypt(const std::string);
+	std::string SHA512_Encrypt(const std::string);
 };
 
 
@@ -201,6 +204,47 @@ std::string OpenSSLPack::Private_Decrypt(const std::string content,const std::st
 	RSA_free(rsak);
 
 	return Encode_str;
+}
+
+std::string OpenSSLPack::Md5_Encrypt(const std::string s)
+{
+	unsigned char md[16];
+	char buffer[33] = { '\0' };
+	char temp[3] = { '\0' };
+
+	MD5_CTX ctx;
+	MD5_Init(&ctx);
+	MD5_Update(&ctx, s.c_str(), s.length());
+	MD5_Final(md, &ctx);
+
+	for (int i = 0; i < 16; ++i) {
+		sprintf(temp, "%02X", md[i]);
+		strcat(buffer, temp);
+	}
+
+	std::string content(buffer);
+	return content;
+}
+
+std::string OpenSSLPack::SHA512_Encrypt(const std::string s)
+{
+	SHA512_CTX ctx;
+	unsigned char md[SHA512_DIGEST_LENGTH];
+
+	SHA512_Init(&ctx);
+	SHA512_Update(&ctx, s.c_str(), s.length());
+	SHA512_Final(md, &ctx);
+	OPENSSL_cleanse(&ctx, sizeof(ctx));
+
+
+	char temp[3] = { '\0' };
+	std::string content;
+	for (int i = 0; i < SHA512_DIGEST_LENGTH; ++i) {
+		sprintf(temp, "%02X", md[i]);
+		content += std::string(temp);
+	}
+	return content;
+
 }
 
 #endif
