@@ -30,6 +30,10 @@ class OpenSSLPack
 	
 	std::string Md5_Encrypt(const std::string);
 	std::string SHA512_Encrypt(const std::string);
+
+	//AES
+	std::string AES_Encrypt(const std::string content,const std::string en_key);
+	std::string AES_Decrypt(const std::string encrypt_string,const std::string en_key);
 };
 
 
@@ -247,4 +251,74 @@ std::string OpenSSLPack::SHA512_Encrypt(const std::string s)
 
 }
 
+
+std::string OpenSSLPack::AES_Encrypt(const std::string content,const std::string en_key) {
+
+	AES_KEY aes;
+
+	int LENGTH = (content.length() + 1) % AES_BLOCK_SIZE == 0 ? content.length() + 1 : ((content.length() + 1) / AES_BLOCK_SIZE + 1) * AES_BLOCK_SIZE;
+
+	unsigned char * input_string = nullptr;
+
+	input_string = new unsigned char[LENGTH] ;
+
+	strncpy((char *)input_string,content.c_str(),content.length());
+
+	unsigned char key[AES_BLOCK_SIZE];
+	unsigned char iv[AES_BLOCK_SIZE];
+
+	strncpy((char *)key,en_key.c_str(),16);
+	memset(iv,0,sizeof(iv));
+
+	int rc = AES_set_encrypt_key(key,128,&aes) ;
+
+	assert(rc >= 0);
+
+
+	unsigned char * encrypt_string = new unsigned char[LENGTH];
+
+	AES_cbc_encrypt(input_string,encrypt_string,LENGTH,&aes,iv,AES_ENCRYPT);
+
+	//std::stringstream ss;
+
+	std::string ans;
+	for (int i = 0; i < LENGTH; ++i) {
+		//ss << std::hex <<((encrypt_string[i] >> 4) & 0xf) << (encrypt_string[i] & 0xf);
+		ans += encrypt_string[i] ;
+	}
+	
+	delete [] encrypt_string;
+//	return ss.str();
+	return ans;
+
+}
+
+std::string OpenSSLPack::AES_Decrypt(const std::string encrypt_string,const std::string en_key) {
+
+	assert(encrypt_string.length() % AES_BLOCK_SIZE == 0);
+
+	AES_KEY aes;
+
+	unsigned char *decrypt_string  = new unsigned char [encrypt_string.length()];
+	
+	unsigned char key[AES_BLOCK_SIZE];
+	unsigned char iv[AES_BLOCK_SIZE];
+
+	strncpy((char *)key,en_key.c_str(),16);
+	memset(iv,0,sizeof(iv));
+
+	int rc = AES_set_decrypt_key(key,128,&aes) ;
+
+	assert(rc >= 0);
+	
+	AES_cbc_encrypt((unsigned char *)encrypt_string.c_str(),decrypt_string,encrypt_string.length(),&aes,iv,AES_DECRYPT);
+
+	std::string ans = "";
+	for (int i = 0; i < strlen((char *)decrypt_string); ++i) {
+		ans += decrypt_string[i];
+	}
+	delete [] decrypt_string;
+	return ans;
+
+}
 #endif
