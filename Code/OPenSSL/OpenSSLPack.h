@@ -329,7 +329,7 @@ std::string OpenSSLPack::AES_Decrypt(const std::string encrypt_string,const std:
 std::string OpenSSLPack::RC4_Encrypt(const std::string & key_buffer,const std::string & content) {
 
 	RC4_KEY key;
-	RC4_set_key(&key,4,(unsigned char *)(key_buffer.c_str()));
+	RC4_set_key(&key,key_buffer.length(),(unsigned char *)(key_buffer.c_str()));
 
 	
 	unsigned char * encrypt_buffer  = nullptr;
