@@ -11,6 +11,8 @@
 #include <openssl/pem.h>
 #include <openssl/bio.h>
 #include <openssl/md5.h>
+#include <openssl/aes.h>
+#include <openssl/rc4.h>
 
 class OpenSSLPack
 {
@@ -36,7 +38,7 @@ class OpenSSLPack
 	std::string AES_Decrypt(const std::string encrypt_string,const std::string en_key);
 
 	//RC4
-	RC4_Encrypt(const std::string & key_buffer,const std::string & content) 
+	std::string RC4_Encrypt(const std::string & key_buffer,const std::string & content); 
 };
 
 
