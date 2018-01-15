@@ -34,6 +34,9 @@ class OpenSSLPack
 	//AES
 	std::string AES_Encrypt(const std::string content,const std::string en_key);
 	std::string AES_Decrypt(const std::string encrypt_string,const std::string en_key);
+
+	//RC4
+	RC4_Encrypt(const std::string & key_buffer,const std::string & content) 
 };
 
 
@@ -321,4 +324,27 @@ std::string OpenSSLPack::AES_Decrypt(const std::string encrypt_string,const std:
 	return ans;
 
 }
+
+
+std::string OpenSSLPack::RC4_Encrypt(const std::string & key_buffer,const std::string & content) {
+
+	RC4_KEY key;
+	RC4_set_key(&key,4,(unsigned char *)(key_buffer.c_str()));
+
+	
+	unsigned char * encrypt_buffer  = nullptr;
+	encrypt_buffer = new unsigned char[content.length() + 1];
+
+	RC4(&key,content.length(),(unsigned char *)(content.c_str()),encrypt_buffer);
+
+
+	std::string out_text;
+	for (int i = 0; i < content.length(); ++i) {
+		out_text += static_cast<char>(encrypt_buffer[i]);
+	}
+
+	delete [] encrypt_buffer;
+	return out_text;
+}
+
 #endif
